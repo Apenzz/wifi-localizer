@@ -23,17 +23,28 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var counter = 0;
+  bool _isScanning = false;
   List<WifiNetwork> networks = [];
 
-  WifiNetwork _generateFakeNetwork() {
+  WifiNetwork _generateFakeNetwork(int index) {
     var rng = Random();
     return WifiNetwork(
-      ssid: "AP_$counter",
+      ssid: "AP_$index",
       bssid: "${rng.nextInt(100)}:${rng.nextInt(100)}:${rng.nextInt(100)}:${rng.nextInt(100)}",
       rssi: rng.nextInt(60) - 90,
     );
   } 
+
+  Future<List<WifiNetwork>> _performScan() async {
+    // Simulate the scanning taking time
+    await Future.delayed(Duration(seconds: 2));
+
+    List<WifiNetwork> results = [];
+    for (int i = 0; i < 3; i++) {
+      results.add(_generateFakeNetwork(i+1));
+    }
+    return results;
+  }
 
   @override 
   Widget build(BuildContext context) {
@@ -46,19 +57,23 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () {
+              onPressed: _isScanning ? null : () async {
                 setState(() {
-                  var networks = [];
-                  for (int i = 0; i < 3; i++) {
-                    counter++;
-                    networks.add(_generateFakeNetwork());
-                  }
+                  _isScanning = true;
                 });
-              },  // todo
+
+                var results = await _performScan();
+
+                setState(() {
+                  networks = results;
+                  _isScanning = false;
+                });
+              },
               child: Text('Scan'),
             ),
-            Text('counter: $counter'),
-            Expanded(
+            _isScanning
+              ? CircularProgressIndicator()
+              : Expanded(
               child: ListView.builder(
                 itemCount: networks.length,
                 itemBuilder: (context, index) {
