@@ -77,16 +77,35 @@ class _HomePageState extends State<HomePage> {
               child: ListView.builder(
                 itemCount: networks.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text('${networks[index].ssid}'),
-                    subtitle: Text('${networks[index].bssid}'),
-                    trailing: Text('${networks[index].rssi}'),
+                  return GestureDetector(
+                    onTap: () => print('I was tapped'),
+                    child: ListTile(
+                      title: Text('${networks[index].ssid}'),
+                      subtitle: Text('${networks[index].bssid}'),
+                      trailing: Text('${networks[index].rssi}'),
+                    ),
                   );
                 },
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ScanResultPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Network details'),
+      ),
+      body: Column(
+        children: [
+          Text('Placeholder')
+        ],
       ),
     );
   }
