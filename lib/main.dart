@@ -78,7 +78,14 @@ class _HomePageState extends State<HomePage> {
                 itemCount: networks.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
-                    onTap: () => print('I was tapped'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ScanResultPage(network: networks[index]),
+                        ),
+                       );
+                    },
                     child: ListTile(
                       title: Text('${networks[index].ssid}'),
                       subtitle: Text('${networks[index].bssid}'),
@@ -96,16 +103,26 @@ class _HomePageState extends State<HomePage> {
 }
 
 class ScanResultPage extends StatelessWidget {
+  final WifiNetwork network;
+
+  ScanResultPage({required this.network});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Network details'),
       ),
-      body: Column(
-        children: [
-          Text('Placeholder')
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('SSID: ${network.ssid}'),
+            Text('BSSID: ${network.bssid}'),
+            Text('RSSI: ${network.rssi} dBm'),
+          ],
+        ),
       ),
     );
   }
