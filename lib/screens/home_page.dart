@@ -6,7 +6,6 @@ import 'package:wifi_localizer/models/wifi_network.dart';
 import 'package:wifi_localizer/screens/scan_result_page.dart';
 
 class HomePage extends StatefulWidget {
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -19,15 +18,19 @@ class _HomePageState extends State<HomePage> {
     if (!await _permissionGranted()) {
       print('Could not scan for networks!');
       return [];
-    } 
+    }
     await _startScan(); // start scanning
 
-    if (await WiFiScan.instance.canGetScannedResults(askPermissions: true) == CanGetScannedResults.yes) {
+    if (await WiFiScan.instance.canGetScannedResults(askPermissions: true) ==
+        CanGetScannedResults.yes) {
       // wait for results via stream
-      final accessPoints = await WiFiScan.instance.onScannedResultsAvailable.first;
+      final accessPoints =
+          await WiFiScan.instance.onScannedResultsAvailable.first;
       List<WifiNetwork> results = [];
       for (var ap in accessPoints) {
-        results.add(WifiNetwork(bssid: ap.bssid, ssid: ap.ssid, rssi: ap.level));
+        results.add(
+          WifiNetwork(bssid: ap.bssid, ssid: ap.ssid, rssi: ap.level),
+        );
       }
       return results;
     }
@@ -36,72 +39,72 @@ class _HomePageState extends State<HomePage> {
 
   Future<bool> _permissionGranted() {
     return Permission.location.request().isGranted;
-  } 
+  }
 
   // trigger full WiFi Scan
   Future<void> _startScan() async {
     // check platform support for any necessary requirements
     final can = await WiFiScan.instance.canStartScan(askPermissions: true);
-    switch(can) {
+    switch (can) {
       case CanStartScan.yes:
         // start full scan async-ly
         final success = await WiFiScan.instance.startScan();
-        if (!success) { print('Scan did not trigger'); }
+        if (!success) {
+          print('Scan did not trigger');
+        }
       default:
         print('Failed to scan');
     }
   }
 
-  @override 
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('WiFi Scanner'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: _isScanning ? null : () async {
-                setState(() {
-                  _isScanning = true; 
-                });
-                var results = await _performScan();
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: _isScanning
+                ? null
+                : () async {
+                    setState(() {
+                      _isScanning = true;
+                    });
+                    var results = await _performScan();
 
-                setState(() {
-                  networks = results;
-                  _isScanning = false;
-                });
-              },
-              child: Text('Scan'),
-            ),
-            _isScanning
+                    setState(() {
+                      networks = results;
+                      _isScanning = false;
+                    });
+                  },
+            child: Text('Scan'),
+          ),
+          _isScanning
               ? CircularProgressIndicator()
               : Expanded(
-              child: ListView.builder(
-                itemCount: networks.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ScanResultPage(network: networks[index]),
+                  child: ListView.builder(
+                    itemCount: networks.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ScanResultPage(network: networks[index]),
+                            ),
+                          );
+                        },
+                        child: ListTile(
+                          title: Text('${networks[index].ssid}'),
+                          subtitle: Text('${networks[index].bssid}'),
+                          trailing: Text('${networks[index].rssi}'),
                         ),
-                       );
+                      );
                     },
-                    child: ListTile(
-                      title: Text('${networks[index].ssid}'),
-                      subtitle: Text('${networks[index].bssid}'),
-                      trailing: Text('${networks[index].rssi}'),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+                  ),
+                ),
+        ],
       ),
     );
   }
