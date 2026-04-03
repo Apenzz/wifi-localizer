@@ -28,15 +28,22 @@ class _HomePageState extends State<HomePage> {
   List<WifiNetwork> networks = [];
 
   Future<List<WifiNetwork>> _performScan() async {
-    List<WifiNetwork> results = [];
-
     if (!await _permissionGranted()) {
       print('Could not scan for networks!');
-      return results;
+      return [];
     } 
     await _startScan(); // start scanning
-    await Future.delayed(Duration(seconds: 2));
-    return _getScannerResults(results); // scan results
+
+    if (await WiFiScan.instance.canGetScannedResults(askPermissions: true) == CanGetScannedResults.yes) {
+      // wait for results via stream
+      final accessPoints = await WiFiScan.instance.onScannedResultsAvailable.first;
+      List<WifiNetwork> results = [];
+      for (var ap in accessPoints) {
+        results.add(WifiNetwork(bssid: ap.bssid, ssid: ap.ssid, rssi: ap.level));
+      }
+      return results;
+    }
+    return [];
   }
 
   Future<bool> _permissionGranted() {
@@ -55,22 +62,6 @@ class _HomePageState extends State<HomePage> {
       default:
         print('Failed to scan');
     }
-  }
-
-  // get scanner results and save them into networks
-  Future<List<WifiNetwork>> _getScannerResults(List<WifiNetwork> results) async {
-    final can = await WiFiScan.instance.canGetScannedResults(askPermissions: true);
-    switch(can) {
-      case CanGetScannedResults.yes:
-      // get scanned results
-      final accessPoints = await WiFiScan.instance.getScannedResults();
-      for (var ap in accessPoints) {
-        results.add(WifiNetwork(bssid: ap.bssid, ssid: ap.ssid, rssi: ap.level));
-      }
-      default:
-        print('Cannot get Scan Results');
-    }
-    return results;
   }
 
   @override 
