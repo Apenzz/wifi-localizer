@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
+import 'package:wifi_scan/wifi_scan.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,22 +27,48 @@ class _HomePageState extends State<HomePage> {
   bool _isScanning = false;
   List<WifiNetwork> networks = [];
 
-  WifiNetwork _generateFakeNetwork(int index) {
-    var rng = Random();
-    return WifiNetwork(
-      ssid: "AP_$index",
-      bssid: "${rng.nextInt(100)}:${rng.nextInt(100)}:${rng.nextInt(100)}:${rng.nextInt(100)}",
-      rssi: rng.nextInt(60) - 90,
-    );
+  Future<List<WifiNetwork>> _performScan() async {
+    List<WifiNetwork> results = [];
+
+    if (!await _permissionGranted()) {
+      print('Could not scan for networks!');
+      return results;
+    } 
+    await _startScan(); // start scanning
+    await Future.delayed(Duration(seconds: 2));
+    return _getScannerResults(results); // scan results
+  }
+
+  Future<bool> _permissionGranted() {
+    return Permission.location.request().isGranted;
   } 
 
-  Future<List<WifiNetwork>> _performScan() async {
-    // Simulate the scanning taking time
-    await Future.delayed(Duration(seconds: 2));
+  // trigger full WiFi Scan
+  Future<void> _startScan() async {
+    // check platform support for any necessary requirements
+    final can = await WiFiScan.instance.canStartScan(askPermissions: true);
+    switch(can) {
+      case CanStartScan.yes:
+        // start full scan async-ly
+        final success = await WiFiScan.instance.startScan();
+        if (!success) { print('Scan did not trigger'); }
+      default:
+        print('Failed to scan');
+    }
+  }
 
-    List<WifiNetwork> results = [];
-    for (int i = 0; i < 3; i++) {
-      results.add(_generateFakeNetwork(i+1));
+  // get scanner results and save them into networks
+  Future<List<WifiNetwork>> _getScannerResults(List<WifiNetwork> results) async {
+    final can = await WiFiScan.instance.canGetScannedResults(askPermissions: true);
+    switch(can) {
+      case CanGetScannedResults.yes:
+      // get scanned results
+      final accessPoints = await WiFiScan.instance.getScannedResults();
+      for (var ap in accessPoints) {
+        results.add(WifiNetwork(bssid: ap.bssid, ssid: ap.ssid, rssi: ap.level));
+      }
+      default:
+        print('Cannot get Scan Results');
     }
     return results;
   }
@@ -59,9 +86,8 @@ class _HomePageState extends State<HomePage> {
             ElevatedButton(
               onPressed: _isScanning ? null : () async {
                 setState(() {
-                  _isScanning = true;
+                  _isScanning = true; 
                 });
-
                 var results = await _performScan();
 
                 setState(() {
