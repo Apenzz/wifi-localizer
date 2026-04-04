@@ -38,22 +38,41 @@ class _TrainingPageState extends State<TrainingPage> {
               ),
             ),
           ),
-          SizedBox(
-            height: 30,
-          ),
+          SizedBox(height: 30),
           ElevatedButton(
-            onPressed:() async {
+            onPressed: () async {
               if (_controller.text != '') {
                 // Perform a WiFi scan.
                 var networks = await WifiService.performScan();
                 // Create fingerprint
                 setState(() {
-                  samples.add(Fingerprint(label: _controller.text, networks: networks, timestamp: DateTime.now()));
+                  samples.add(
+                    Fingerprint(
+                      label: _controller.text,
+                      networks: networks,
+                      timestamp: DateTime.now(),
+                    ),
+                  );
                 });
               }
               print(samples);
             },
             child: Text('Collect Sample'),
+          ),
+          SizedBox(height: 30,),
+          samples.isEmpty
+            ? Text('No samples collected yet')
+            : Expanded(
+            child: ListView.builder(
+              itemCount: samples.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(samples[index].label),
+                  subtitle: Text('${samples[index].networks.length} APs detected'),
+                  trailing: Text('${samples[index].timestamp.hour}:${samples[index].timestamp.minute.toString().padLeft(2, '0')}'),
+                );
+              },
+            ),
           ),
         ],
       ),
