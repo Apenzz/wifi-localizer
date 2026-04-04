@@ -6,5 +6,5 @@ class Fingerprint {
   final List<WifiNetwork> networks;
   final DateTime timestamp;
 
-  Fingerprint(this.label, this.networks, this.timestamp);
+  Fingerprint({required this.label, required this.networks, required this.timestamp});
 }
