@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  ScanResultPage(network: networks[index]),
+                                  ScanResultPage(networks: networks),
                             ),
                           );
                         },

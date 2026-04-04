@@ -3,25 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:wifi_localizer/models/wifi_network.dart';
 
 class ScanResultPage extends StatelessWidget {
-  final WifiNetwork network;
+  final List<WifiNetwork> networks;
 
-  ScanResultPage({required this.network});
+  ScanResultPage({required this.networks});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Network details'),
+        title: Text('Network Scan Details'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('SSID: ${network.ssid}'),
-            Text('BSSID: ${network.bssid}'),
-            Text('RSSI: ${network.rssi} dBm'),
-          ],
+        child: ListView.builder(
+          itemCount: networks.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(networks[index].ssid),
+              subtitle: Text(networks[index].bssid),
+              trailing: Text('${networks[index].rssi}'),
+            );
+          },
         ),
       ),
     );

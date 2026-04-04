@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wifi_localizer/models/fingerprint.dart';
+import 'package:wifi_localizer/screens/scan_result_page.dart';
 import 'package:wifi_localizer/services/wifi_service.dart';
 
 class TrainingPage extends StatefulWidget {
@@ -66,10 +67,20 @@ class _TrainingPageState extends State<TrainingPage> {
             child: ListView.builder(
               itemCount: samples.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(samples[index].label),
-                  subtitle: Text('${samples[index].networks.length} APs detected'),
-                  trailing: Text('${samples[index].timestamp.hour}:${samples[index].timestamp.minute.toString().padLeft(2, '0')}'),
+                return GestureDetector(
+                  child: ListTile(
+                    title: Text(samples[index].label),
+                    subtitle: Text('${samples[index].networks.length} APs detected'),
+                    trailing: Text('${samples[index].timestamp.hour}:${samples[index].timestamp.minute.toString().padLeft(2, '0')}'),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ScanResultPage(networks: samples[index].networks),
+                      )
+                    );
+                  },
                 );
               },
             ),
