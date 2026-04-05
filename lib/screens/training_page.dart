@@ -10,7 +10,9 @@ class TrainingPage extends StatefulWidget {
 }
 
 class _TrainingPageState extends State<TrainingPage> {
-  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _labelController = TextEditingController();
+  final TextEditingController _xController = TextEditingController();
+  final TextEditingController _yController = TextEditingController();
   List<Fingerprint> samples = [];
   bool _isLoading = true;
 
@@ -30,7 +32,9 @@ class _TrainingPageState extends State<TrainingPage> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _labelController.dispose();
+    _xController.dispose();
+    _yController.dispose();
     super.dispose();
   }
 
@@ -43,32 +47,66 @@ class _TrainingPageState extends State<TrainingPage> {
           SizedBox(
             width: 250,
             child: TextField(
-              controller: _controller,
+              controller: _labelController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Label',
               ),
             ),
           ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // x coordinate input
+              SizedBox(
+                width: 115,
+                child: TextField(
+                  controller: _xController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'x',
+                  ),
+                ),
+              ),
+              SizedBox(width: 20),
+              // y coordinate input
+              SizedBox(
+                width: 115,
+                child: TextField(
+                  controller: _yController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'y',
+                  ),
+                ),
+              ),
+            ],
+          ),
           SizedBox(height: 30),
           ElevatedButton(
             onPressed: () async {
-              if (_controller.text != '') {
-                // Perform a WiFi scan.
-                var networks = await WifiService.performScan();
-                // Create fingerprint
-                setState(() {
-                  samples.add(
-                    Fingerprint(
-                      label: _controller.text,
-                      networks: networks,
-                      timestamp: DateTime.now(),
-                    ),
-                  );
-                });
-                // save samples on disk
-                await StorageService.saveFingerprints(samples);
-              }
+              var x = double.tryParse(_xController.text);
+              var y = double.tryParse(_yController.text);
+              if (x == null || y == null) return;
+              // Perform a WiFi scan.
+              var networks = await WifiService.performScan();
+              // Create fingerprint
+              setState(() {
+                samples.add(
+                  Fingerprint(
+                    x: x,
+                    y: y,
+                    label: _labelController.text,
+                    networks: networks,
+                    timestamp: DateTime.now(),
+                  ),
+                );
+              });
+              // save samples on disk
+              await StorageService.saveFingerprints(samples);
               print(samples);
             },
             child: Text('Collect Sample'),
@@ -84,7 +122,11 @@ class _TrainingPageState extends State<TrainingPage> {
                     itemBuilder: (context, index) {
                       return GestureDetector(
                         child: ListTile(
-                          title: Text(samples[index].label),
+                          title: Text(
+                            samples[index].label != null
+                                ? '${samples[index].label} (${samples[index].x}, ${samples[index].y})'
+                                : '(${samples[index].x}, ${samples[index].y})',
+                          ),
                           subtitle: Text(
                             '${samples[index].networks.length} APs detected',
                           ),
