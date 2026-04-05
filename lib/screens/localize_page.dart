@@ -75,7 +75,26 @@ class _LocalizePageState extends State<LocalizePage> {
           Expanded(
             child: _position == null
               ? Text('No positions estimated')
-              : Text('Coordinates\n(${_position!.x}, ${_position!.y})'),
+              : Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset('assets/planimetria_casa.jpg'),
+                  ),
+                  Positioned(
+                    left: 200, // TODO: fix hardcoded coordinates
+                    top: 150,
+                    child: Container(
+                      width: 15,
+                      height: 15,
+                      decoration: BoxDecoration(
+                        color: Colors.lightBlueAccent,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
           ),
         ],
       ),
