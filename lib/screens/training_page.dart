@@ -12,17 +12,19 @@ class TrainingPage extends StatefulWidget {
 class _TrainingPageState extends State<TrainingPage> {
   final TextEditingController _controller = TextEditingController();
   List<Fingerprint> samples = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadSamples(); 
+    _loadSamples();
   }
 
   void _loadSamples() async {
     var loaded = await StorageService.loadFingerprints();
     setState(() {
       samples = loaded;
+      _isLoading = false;
     });
   }
 
@@ -71,31 +73,39 @@ class _TrainingPageState extends State<TrainingPage> {
             },
             child: Text('Collect Sample'),
           ),
-          SizedBox(height: 30,),
-          samples.isEmpty
-            ? Text('No samples collected yet')
-            : Expanded(
-            child: ListView.builder(
-              itemCount: samples.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  child: ListTile(
-                    title: Text(samples[index].label),
-                    subtitle: Text('${samples[index].networks.length} APs detected'),
-                    trailing: Text('${samples[index].timestamp.hour}:${samples[index].timestamp.minute.toString().padLeft(2, '0')}'),
+          SizedBox(height: 30),
+          _isLoading
+              ? CircularProgressIndicator()
+              : samples.isEmpty
+              ? Text('No samples collected yet')
+              : Expanded(
+                  child: ListView.builder(
+                    itemCount: samples.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        child: ListTile(
+                          title: Text(samples[index].label),
+                          subtitle: Text(
+                            '${samples[index].networks.length} APs detected',
+                          ),
+                          trailing: Text(
+                            '${samples[index].timestamp.hour}:${samples[index].timestamp.minute.toString().padLeft(2, '0')}',
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ScanResultPage(
+                                networks: samples[index].networks,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ScanResultPage(networks: samples[index].networks),
-                      )
-                    );
-                  },
-                );
-              },
-            ),
-          ),
+                ),
         ],
       ),
     );
