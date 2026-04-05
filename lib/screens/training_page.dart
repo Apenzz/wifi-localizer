@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wifi_localizer/models/fingerprint.dart';
 import 'package:wifi_localizer/screens/scan_result_page.dart';
+import 'package:wifi_localizer/services/storage_service.dart';
 import 'package:wifi_localizer/services/wifi_service.dart';
 
 class TrainingPage extends StatefulWidget {
@@ -15,6 +16,14 @@ class _TrainingPageState extends State<TrainingPage> {
   @override
   void initState() {
     super.initState();
+    _loadSamples(); 
+  }
+
+  void _loadSamples() async {
+    var loaded = await StorageService.loadFingerprints();
+    setState(() {
+      samples = loaded;
+    });
   }
 
   @override
@@ -55,6 +64,8 @@ class _TrainingPageState extends State<TrainingPage> {
                     ),
                   );
                 });
+                // save samples on disk
+                await StorageService.saveFingerprints(samples);
               }
               print(samples);
             },
