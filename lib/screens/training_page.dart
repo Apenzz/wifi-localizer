@@ -86,30 +86,49 @@ class _TrainingPageState extends State<TrainingPage> {
             ],
           ),
           SizedBox(height: 30),
-          ElevatedButton(
-            onPressed: () async {
-              var x = double.tryParse(_xController.text);
-              var y = double.tryParse(_yController.text);
-              if (x == null || y == null) return;
-              // Perform a WiFi scan.
-              var networks = await WifiService.performScan();
-              // Create fingerprint
-              setState(() {
-                samples.add(
-                  Fingerprint(
-                    x: x,
-                    y: y,
-                    label: _labelController.text,
-                    networks: networks,
-                    timestamp: DateTime.now(),
-                  ),
-                );
-              });
-              // save samples on disk
-              await StorageService.saveFingerprints(samples);
-              print(samples);
-            },
-            child: Text('Collect Sample'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  var x = double.tryParse(_xController.text);
+                  var y = double.tryParse(_yController.text);
+                  if (x == null || y == null) return;
+                  // Perform a WiFi scan.
+                  var networks = await WifiService.performScan();
+                  // Create fingerprint
+                  setState(() {
+                    samples.add(
+                      Fingerprint(
+                        x: x,
+                        y: y,
+                        label: _labelController.text,
+                        networks: networks,
+                        timestamp: DateTime.now(),
+                      ),
+                    );
+                  });
+                  // save samples on disk
+                  await StorageService.saveFingerprints(samples);
+                  print(samples);
+                },
+                child: Text('Collect Sample'),
+              ),
+              SizedBox(width: 10,),
+              ElevatedButton(
+                onPressed: () async {
+                  setState(() {
+                    samples.clear();
+                  }); 
+                  await StorageService.saveFingerprints(samples);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text('Clear All'),
+              )
+            ],
           ),
           SizedBox(height: 30),
           _isLoading
