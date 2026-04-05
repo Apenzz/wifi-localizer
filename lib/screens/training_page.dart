@@ -120,7 +120,16 @@ class _TrainingPageState extends State<TrainingPage> {
                   child: ListView.builder(
                     itemCount: samples.length,
                     itemBuilder: (context, index) {
-                      return GestureDetector(
+                      return Dismissible(
+                        key: ValueKey(
+                          samples[index].timestamp.toIso8601String(),
+                        ),
+                        onDismissed: (direction) async {
+                          setState(() {
+                            samples.removeAt(index);
+                          });
+                          await StorageService.saveFingerprints(samples);
+                        },
                         child: ListTile(
                           title: Text(
                             samples[index].label != null
@@ -133,17 +142,17 @@ class _TrainingPageState extends State<TrainingPage> {
                           trailing: Text(
                             '${samples[index].timestamp.hour}:${samples[index].timestamp.minute.toString().padLeft(2, '0')}',
                           ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ScanResultPage(
-                                networks: samples[index].networks,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ScanResultPage(
+                                  networks: samples[index].networks,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       );
                     },
                   ),
