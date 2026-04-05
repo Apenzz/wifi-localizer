@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:wifi_localizer/screens/home_page.dart';
+import 'package:wifi_localizer/screens/localize_page.dart';
 import 'package:wifi_localizer/screens/training_page.dart';
 
 
@@ -20,6 +21,7 @@ class _MyAppState extends State<MyApp> {
 
   final List<Widget> _pages = [
     HomePage(),
+    LocalizePage(),
     TrainingPage(),
   ];
 
@@ -42,6 +44,10 @@ class _MyAppState extends State<MyApp> {
             NavigationDestination(
               icon: Icon(Icons.wifi),
               label: 'Scan',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.navigation),
+              label: 'Localize',
             ),
             NavigationDestination(
               selectedIcon: Icon(Icons.location_on),

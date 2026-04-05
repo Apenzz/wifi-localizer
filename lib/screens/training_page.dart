@@ -114,12 +114,12 @@ class _TrainingPageState extends State<TrainingPage> {
                 },
                 child: Text('Collect Sample'),
               ),
-              SizedBox(width: 10,),
+              SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () async {
                   setState(() {
                     samples.clear();
-                  }); 
+                  });
                   await StorageService.saveFingerprints(samples);
                 },
                 style: ElevatedButton.styleFrom(
@@ -127,7 +127,7 @@ class _TrainingPageState extends State<TrainingPage> {
                   foregroundColor: Colors.white,
                 ),
                 child: Text('Clear All'),
-              )
+              ),
             ],
           ),
           SizedBox(height: 30),
