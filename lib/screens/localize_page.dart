@@ -78,12 +78,12 @@ class _LocalizePageState extends State<LocalizePage> {
               : Stack(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Image.asset('assets/planimetria_casa.jpg'),
                   ),
                   Positioned(
-                    left: 200, // TODO: fix hardcoded coordinates
-                    top: 150,
+                    left: _position!.x - 7.5,
+                    top: _position!.y - 7.5,
                     child: Container(
                       width: 15,
                       height: 15,

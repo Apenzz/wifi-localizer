@@ -11,10 +11,9 @@ class TrainingPage extends StatefulWidget {
 
 class _TrainingPageState extends State<TrainingPage> {
   final TextEditingController _labelController = TextEditingController();
-  final TextEditingController _xController = TextEditingController();
-  final TextEditingController _yController = TextEditingController();
   List<Fingerprint> samples = [];
   bool _isLoading = true;
+  double? _tapX, _tapY;
 
   @override
   void initState() {
@@ -33,8 +32,6 @@ class _TrainingPageState extends State<TrainingPage> {
   @override
   void dispose() {
     _labelController.dispose();
-    _xController.dispose();
-    _yController.dispose();
     super.dispose();
   }
 
@@ -55,53 +52,50 @@ class _TrainingPageState extends State<TrainingPage> {
             ),
           ),
           SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // x coordinate input
-              SizedBox(
-                width: 115,
-                child: TextField(
-                  controller: _xController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'x',
-                  ),
-                ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: GestureDetector(
+              onTapDown: (details) {
+                setState(() {
+                  _tapX = details.localPosition.dx;
+                  _tapY = details.localPosition.dy;
+                });
+              },
+              child: Stack(
+                children: [
+                  Image.asset('assets/planimetria_casa.jpg'),
+                  if (_tapX != null && _tapY != null)
+                    Positioned(
+                      left: _tapX! - 7.5,
+                      top: _tapY! - 7.5,
+                      child: Container(
+                        width: 15,
+                        height: 15,
+                        decoration: BoxDecoration(
+                          color: Colors.lightBlueAccent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              SizedBox(width: 20),
-              // y coordinate input
-              SizedBox(
-                width: 115,
-                child: TextField(
-                  controller: _yController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'y',
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-          SizedBox(height: 30),
+          SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
                 onPressed: () async {
-                  var x = double.tryParse(_xController.text);
-                  var y = double.tryParse(_yController.text);
-                  if (x == null || y == null) return;
+                  if (_tapX == null || _tapY == null) return;
                   // Perform a WiFi scan.
                   var networks = await WifiService.performScan();
                   // Create fingerprint
                   setState(() {
                     samples.add(
                       Fingerprint(
-                        x: x,
-                        y: y,
+                        x: _tapX!,
+                        y: _tapY!,
                         label: _labelController.text,
                         networks: networks,
                         timestamp: DateTime.now(),
