@@ -28,9 +28,17 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          centerTitle: true,
+        )
+      ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text(_currentIndex == 0 ? 'WiFi Scanner' : 'Training'),
+          title: Text(_currentIndex == 0 ? 'WiFi Scanner' : _currentIndex == 1 ? 'Live Position' : 'Collect Fingerprints'),
         ),
         body: _pages[_currentIndex],
         bottomNavigationBar: NavigationBar(

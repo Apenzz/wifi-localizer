@@ -41,13 +41,21 @@ class _LocalizePageState extends State<LocalizePage> {
   void _startLocalization() async {
     var results = await WifiService.performScan();
     setState(() {
-      _position = KnnService.estimatePosition(results, fingerprints, method: _method);
+      _position = KnnService.estimatePosition(
+        results,
+        fingerprints,
+        method: _method,
+      );
     });
 
     _timer = Timer.periodic(Duration(seconds: countdown), (timer) async {
       var results = await WifiService.performScan();
       setState(() {
-        _position = KnnService.estimatePosition(results, fingerprints, method: _method);
+        _position = KnnService.estimatePosition(
+          results,
+          fingerprints,
+          method: _method,
+        );
       });
     });
   }
@@ -61,42 +69,45 @@ class _LocalizePageState extends State<LocalizePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          SegmentedButton(
-            selected: <KnnMethod>{_method},
-            onSelectionChanged: (newSelection) {
-              setState(() {
-                _method = newSelection.first;
-              });
-            },
-            segments: [
-              ButtonSegment(value: KnnMethod.basic, label: Text('kNN')),
-              ButtonSegment(value: KnnMethod.weighted, label: Text('wkNN')),
-              ButtonSegment(value: KnnMethod.adaptive, label: Text('sawkNN')),
-            ],
-          ),
-          Text('Coordinates: '),
-          Switch(
-            value: light,
-            onChanged: fingerprints.isEmpty
-                ? null
-                : (bool value) {
-                    setState(() {
-                      light = value;
-                    });
-                    value ? _startLocalization() : _stopLocalization();
-                  },
-          ),
-          Expanded(
-            child: _position == null
-                ? Text('No positions estimated')
-                : FloorPlanWidget(
-                  position: _position,
-                ),
-          ),
-        ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: Center(
+        child: Column(
+          children: [
+            SegmentedButton(
+              selected: <KnnMethod>{_method},
+              onSelectionChanged: (newSelection) {
+                setState(() {
+                  _method = newSelection.first;
+                });
+              },
+              segments: [
+                ButtonSegment(value: KnnMethod.basic, label: Text('kNN')),
+                ButtonSegment(value: KnnMethod.weighted, label: Text('wkNN')),
+                ButtonSegment(value: KnnMethod.adaptive, label: Text('sawkNN')),
+              ],
+            ),
+            SizedBox(height: 10.0),
+            SizedBox(
+              width: 210.0,
+              child: SwitchListTile(
+                title: Text('Live Position'),
+                horizontalTitleGap: 4.0,
+                value: light,
+                onChanged: fingerprints.isEmpty
+                    ? null
+                    : (bool value) {
+                        setState(() {
+                          light = value;
+                        });
+                        value ? _startLocalization() : _stopLocalization();
+                      },
+              ),
+            ),
+            SizedBox(height: 16.0),
+            Expanded(child: FloorPlanWidget(position: _position)),
+          ],
+        ),
       ),
     );
   }
