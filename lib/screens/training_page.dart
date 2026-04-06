@@ -132,8 +132,8 @@ class _TrainingPageState extends State<TrainingPage> {
                           child: ListTile(
                             title: Text(
                               samples[index].label != null
-                                  ? '${samples[index].label} (${samples[index].x}, ${samples[index].y})'
-                                  : '(${samples[index].x}, ${samples[index].y})',
+                                  ? '${samples[index].label} (${samples[index].x.toStringAsFixed(1)}, ${samples[index].y.toStringAsFixed(1)})'
+                                  : '(${samples[index].x.toStringAsFixed(1)}, ${samples[index].y.toStringAsFixed(1)})',
                             ),
                             subtitle: Text(
                               '${samples[index].networks.length} APs detected',
