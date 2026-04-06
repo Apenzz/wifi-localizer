@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:wifi_localizer/services/knn_service.dart';
 import 'package:wifi_localizer/services/wifi_service.dart';
 import 'package:wifi_localizer/models/fingerprint.dart';
+import 'package:wifi_localizer/widgets/floor_plan_widget.dart';
 
 class LocalizePage extends StatefulWidget {
   @override
@@ -91,25 +92,8 @@ class _LocalizePageState extends State<LocalizePage> {
           Expanded(
             child: _position == null
                 ? Text('No positions estimated')
-                : Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Stack(
-                      children: [
-                        Image.asset('assets/planimetria_casa.jpg'),
-                        Positioned(
-                          left: _position!.x - 7.5,
-                          top: _position!.y - 7.5,
-                          child: Container(
-                            width: 15,
-                            height: 15,
-                            decoration: BoxDecoration(
-                              color: Colors.lightBlueAccent,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                : FloorPlanWidget(
+                  position: _position,
                 ),
           ),
         ],

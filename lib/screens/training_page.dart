@@ -3,6 +3,7 @@ import 'package:wifi_localizer/models/fingerprint.dart';
 import 'package:wifi_localizer/screens/scan_result_page.dart';
 import 'package:wifi_localizer/services/storage_service.dart';
 import 'package:wifi_localizer/services/wifi_service.dart';
+import 'package:wifi_localizer/widgets/floor_plan_widget.dart';
 
 class TrainingPage extends StatefulWidget {
   @override
@@ -52,34 +53,14 @@ class _TrainingPageState extends State<TrainingPage> {
             ),
           ),
           SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: GestureDetector(
-              onTapDown: (details) {
-                setState(() {
-                  _tapX = details.localPosition.dx;
-                  _tapY = details.localPosition.dy;
-                });
-              },
-              child: Stack(
-                children: [
-                  Image.asset('assets/planimetria_casa.jpg'),
-                  if (_tapX != null && _tapY != null)
-                    Positioned(
-                      left: _tapX! - 7.5,
-                      top: _tapY! - 7.5,
-                      child: Container(
-                        width: 15,
-                        height: 15,
-                        decoration: BoxDecoration(
-                          color: Colors.lightBlueAccent,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
+          FloorPlanWidget(
+            position: _tapX != null && _tapY != null ? (x: _tapX!, y: _tapY!) : null,
+            onTap: (x, y) {
+              setState(() {
+                _tapX = x;
+                _tapY = y;
+              });
+            },
           ),
           SizedBox(height: 20),
           Row(
