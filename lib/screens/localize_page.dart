@@ -16,6 +16,7 @@ class _LocalizePageState extends State<LocalizePage> {
   Timer? _timer;
   List<Fingerprint> fingerprints = [];
   ({double x, double y})? _position;
+  KnnMethod _method = KnnMethod.basic;
 
   @override
   void initState() {
@@ -39,13 +40,13 @@ class _LocalizePageState extends State<LocalizePage> {
   void _startLocalization() async {
     var results = await WifiService.performScan();
     setState(() {
-      _position = KnnService.estimatePosition(results, fingerprints);
+      _position = KnnService.estimatePosition(results, fingerprints, method: _method);
     });
 
     _timer = Timer.periodic(Duration(seconds: countdown), (timer) async {
       var results = await WifiService.performScan();
       setState(() {
-        _position = KnnService.estimatePosition(results, fingerprints);
+        _position = KnnService.estimatePosition(results, fingerprints, method: _method);
       });
     });
   }
@@ -62,39 +63,54 @@ class _LocalizePageState extends State<LocalizePage> {
     return Center(
       child: Column(
         children: [
+          SegmentedButton(
+            selected: <KnnMethod>{_method},
+            onSelectionChanged: (newSelection) {
+              setState(() {
+                _method = newSelection.first;
+              });
+            },
+            segments: [
+              ButtonSegment(value: KnnMethod.basic, label: Text('kNN')),
+              ButtonSegment(value: KnnMethod.weighted, label: Text('wkNN')),
+              ButtonSegment(value: KnnMethod.adaptive, label: Text('sawkNN')),
+            ],
+          ),
           Text('Coordinates: '),
           Switch(
             value: light,
-            onChanged: fingerprints.isEmpty ? null : (bool value) {
-              setState(() {
-                light = value;
-              });
-              value ? _startLocalization() : _stopLocalization();
-            },
+            onChanged: fingerprints.isEmpty
+                ? null
+                : (bool value) {
+                    setState(() {
+                      light = value;
+                    });
+                    value ? _startLocalization() : _stopLocalization();
+                  },
           ),
           Expanded(
             child: _position == null
-              ? Text('No positions estimated')
-              : Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Image.asset('assets/planimetria_casa.jpg'),
-                  ),
-                  Positioned(
-                    left: _position!.x - 7.5,
-                    top: _position!.y - 7.5,
-                    child: Container(
-                      width: 15,
-                      height: 15,
-                      decoration: BoxDecoration(
-                        color: Colors.lightBlueAccent,
-                        shape: BoxShape.circle,
-                      ),
+                ? Text('No positions estimated')
+                : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Stack(
+                      children: [
+                        Image.asset('assets/planimetria_casa.jpg'),
+                        Positioned(
+                          left: _position!.x - 7.5,
+                          top: _position!.y - 7.5,
+                          child: Container(
+                            width: 15,
+                            height: 15,
+                            decoration: BoxDecoration(
+                              color: Colors.lightBlueAccent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
+                ),
           ),
         ],
       ),
