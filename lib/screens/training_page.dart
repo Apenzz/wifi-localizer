@@ -97,10 +97,29 @@ class _TrainingPageState extends State<TrainingPage> {
                 SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () async {
-                    setState(() {
-                      samples.clear();
-                    });
-                    await StorageService.saveFingerprints(samples);
+                    var confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('Clear All'),
+                        content: Text('Are you sure? This action will delete all collected samples.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text('Delete', style: TextStyle(color: Colors.red),),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true) {
+                      setState(() {
+                        samples.clear();
+                      });
+                      await StorageService.saveFingerprints(samples);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
