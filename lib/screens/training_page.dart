@@ -55,14 +55,17 @@ class _TrainingPageState extends State<TrainingPage> {
               ),
             ),
             SizedBox(height: 20),
-            FloorPlanWidget(
-              position: _tapX != null && _tapY != null ? (x: _tapX!, y: _tapY!) : null,
-              onTap: (x, y) {
-                setState(() {
-                  _tapX = x;
-                  _tapY = y;
-                });
-              },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: FloorPlanWidget(
+                position: _tapX != null && _tapY != null ? (x: _tapX!, y: _tapY!) : null,
+                onTap: (x, y) {
+                  setState(() {
+                    _tapX = x;
+                    _tapY = y;
+                  });
+                },
+              ),
             ),
             SizedBox(height: 20),
             Row(

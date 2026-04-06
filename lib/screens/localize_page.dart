@@ -105,7 +105,10 @@ class _LocalizePageState extends State<LocalizePage> {
               ),
             ),
             SizedBox(height: 16.0),
-            Expanded(child: FloorPlanWidget(position: _position)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: FloorPlanWidget(position: _position),
+            ),
           ],
         ),
       ),
