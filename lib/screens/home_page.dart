@@ -52,8 +52,8 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                         child: ListTile(
-                          title: Text('${networks[index].ssid}'),
-                          subtitle: Text('${networks[index].bssid}'),
+                          title: Text(networks[index].ssid),
+                          subtitle: Text(networks[index].bssid),
                           trailing: Text('${networks[index].rssi}'),
                         ),
                       );
