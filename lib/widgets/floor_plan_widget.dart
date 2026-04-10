@@ -37,7 +37,7 @@ class FloorPlanWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           child: Stack(
             children: [
-              Image.asset('assets/planimetria_casa.jpg'),
+              Image.asset('assets/torre_archimede_piano1.jpg'),
               ...trainingPoints.map((point) => Positioned(
                 left: point.x - 5,
                 top: point.y - 5,

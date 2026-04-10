@@ -13,7 +13,6 @@ class TrainingPage extends StatefulWidget {
 class _TrainingPageState extends State<TrainingPage> {
   final TextEditingController _labelController = TextEditingController();
   List<Fingerprint> samples = [];
-  bool _isLoading = true;
   double? _tapX, _tapY;
 
   @override
@@ -26,7 +25,6 @@ class _TrainingPageState extends State<TrainingPage> {
     var loaded = await StorageService.loadFingerprints();
     setState(() {
       samples = loaded;
-      _isLoading = false;
     });
   }
 
@@ -38,147 +36,175 @@ class _TrainingPageState extends State<TrainingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20.0),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 250,
-              child: TextField(
-                controller: _labelController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Label',
+    return Stack(
+      children: [
+        // Main content
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20.0),
+          child: Column(
+            children: [
+              SizedBox(
+                width: 250,
+                child: TextField(
+                  controller: _labelController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Label',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: FloorPlanWidget(
-                position: _tapX != null && _tapY != null ? (x: _tapX!, y: _tapY!) : null,
-                trainingPoints: samples.map((s) => (x: s.x, y: s.y)).toList(),
-                onTap: (x, y) {
-                  setState(() {
-                    _tapX = x;
-                    _tapY = y;
-                  });
-                },
-              ),
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_tapX == null || _tapY == null) return;
-                    // Perform a WiFi scan.
-                    var networks = await WifiService.performScan();
-                    // Create fingerprint
-                    setState(() {
-                      samples.add(
-                        Fingerprint(
-                          x: _tapX!,
-                          y: _tapY!,
-                          label: _labelController.text,
-                          networks: networks,
-                          timestamp: DateTime.now(),
-                        ),
-                      );
-                    });
-                    // save samples on disk
-                    await StorageService.saveFingerprints(samples);
-                    print(samples);
-                  },
-                  child: Text('Collect Sample'),
-                ),
-                SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () async {
-                    var confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Clear All'),
-                        content: Text('Are you sure? This action will delete all collected samples.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: Text('Delete', style: TextStyle(color: Colors.red),),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirm == true) {
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (_tapX == null || _tapY == null) return;
+                      var networks = await WifiService.performScan();
                       setState(() {
-                        samples.clear();
+                        samples.add(
+                          Fingerprint(
+                            x: _tapX!,
+                            y: _tapY!,
+                            label: _labelController.text,
+                            networks: networks,
+                            timestamp: DateTime.now(),
+                          ),
+                        );
                       });
                       await StorageService.saveFingerprints(samples);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
+                    },
+                    child: Text('Collect Sample'),
                   ),
-                  child: Text('Clear All'),
-                ),
-              ],
-            ),
-            SizedBox(height: 30),
-            _isLoading
-                ? CircularProgressIndicator()
-                : samples.isEmpty
-                ? Text('No samples collected yet')
-                : Expanded(
-                    child: ListView.builder(
-                      itemCount: samples.length,
-                      itemBuilder: (context, index) {
-                        return Dismissible(
-                          key: ValueKey(
-                            samples[index].timestamp.toIso8601String(),
+                  SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () async {
+                      var confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Clear All'),
+                          content: Text(
+                            'Are you sure? This action will delete all collected samples.',
                           ),
-                          onDismissed: (direction) async {
-                            setState(() {
-                              samples.removeAt(index);
-                            });
-                            await StorageService.saveFingerprints(samples);
-                          },
-                          child: ListTile(
-                            title: Text(
-                              samples[index].label != null
-                                  ? '${samples[index].label} (${samples[index].x.toStringAsFixed(1)}, ${samples[index].y.toStringAsFixed(1)})'
-                                  : '(${samples[index].x.toStringAsFixed(1)}, ${samples[index].y.toStringAsFixed(1)})',
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text('Cancel'),
                             ),
-                            subtitle: Text(
-                              '${samples[index].networks.length} APs detected',
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
                             ),
-                            trailing: Text(
-                              '${samples[index].timestamp.hour}:${samples[index].timestamp.minute.toString().padLeft(2, '0')}',
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ScanResultPage(
-                                    networks: samples[index].networks,
-                                  ),
-                                ),
-                              );
-                            },
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        setState(() {
+                          samples.clear();
+                        });
+                        await StorageService.saveFingerprints(samples);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text('Clear All'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: FloorPlanWidget(
+                  position: _tapX != null && _tapY != null
+                      ? (x: _tapX!, y: _tapY!)
+                      : null,
+                  trainingPoints: samples
+                      .map((s) => (x: s.x, y: s.y))
+                      .toList(),
+                  onTap: (x, y) {
+                    setState(() {
+                      _tapX = x;
+                      _tapY = y;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Draggable bottom sheet
+        DraggableScrollableSheet(
+          initialChildSize: 0.15,
+          minChildSize: 0.15,
+          maxChildSize: 1.0,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
+              ),
+              child: ListView.builder(
+                controller: scrollController,
+                itemCount: samples.length + 1,
+                itemBuilder: (context, index) {
+                  // Drag handle
+                  if (index == 0) {
+                    return Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[400],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  var sample = samples[index - 1];
+                  return Dismissible(
+                    key: ValueKey(sample.timestamp.toIso8601String()),
+                    onDismissed: (direction) async {
+                      setState(() {
+                        samples.removeAt(index - 1);
+                      });
+                      await StorageService.saveFingerprints(samples);
+                    },
+                    child: ListTile(
+                      title: Text(
+                        sample.label != null
+                            ? '${sample.label} (${sample.x.toStringAsFixed(1)}, ${sample.y.toStringAsFixed(1)})'
+                            : '(${sample.x.toStringAsFixed(1)}, ${sample.y.toStringAsFixed(1)})',
+                      ),
+                      subtitle: Text('${sample.networks.length} APs detected'),
+                      trailing: Text(
+                        '${sample.timestamp.hour}:${sample.timestamp.minute.toString().padLeft(2, '0')}',
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ScanResultPage(networks: sample.networks),
                           ),
                         );
                       },
                     ),
-                  ),
-          ],
+                  );
+                },
+              ),
+            );
+          },
         ),
-      ),
+      ],
     );
   }
 }
