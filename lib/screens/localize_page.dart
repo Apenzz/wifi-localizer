@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wifi_localizer/services/storage_service.dart';
 import 'dart:async';
+import 'dart:io';
+import 'package:wifi_localizer/services/image_service.dart';
 import 'package:wifi_localizer/services/knn_service.dart';
 import 'package:wifi_localizer/services/wifi_service.dart';
 import 'package:wifi_localizer/models/fingerprint.dart';
@@ -18,17 +20,26 @@ class _LocalizePageState extends State<LocalizePage> {
   List<Fingerprint> fingerprints = [];
   ({double x, double y})? _position;
   KnnMethod _method = KnnMethod.basic;
+  File? imageFloor;
 
   @override
   void initState() {
     super.initState();
     _loadSamples();
+    _loadImage();    
   }
 
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  void _loadImage() async {
+    var image = await ImageService.retrieveImage();
+    setState(() {
+      imageFloor = image;
+    });
   }
 
   void _loadSamples() async {
@@ -107,7 +118,7 @@ class _LocalizePageState extends State<LocalizePage> {
             SizedBox(height: 16.0),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: FloorPlanWidget(position: _position),
+              child: FloorPlanWidget(position: _position, imageFloor: imageFloor,),
             ),
           ],
         ),

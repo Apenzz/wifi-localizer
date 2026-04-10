@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:wifi_localizer/models/fingerprint.dart';
 import 'package:wifi_localizer/screens/scan_result_page.dart';
+import 'package:wifi_localizer/services/image_service.dart';
 import 'package:wifi_localizer/services/storage_service.dart';
 import 'package:wifi_localizer/services/wifi_service.dart';
 import 'package:wifi_localizer/widgets/floor_plan_widget.dart';
@@ -14,11 +16,20 @@ class _TrainingPageState extends State<TrainingPage> {
   final TextEditingController _labelController = TextEditingController();
   List<Fingerprint> samples = [];
   double? _tapX, _tapY;
+  File? imageFloor;
 
   @override
   void initState() {
     super.initState();
     _loadSamples();
+    _loadImage();
+  }
+
+  void _loadImage() async {
+    var image = await ImageService.retrieveImage();
+    setState(() {
+      imageFloor = image;
+    });
   }
 
   void _loadSamples() async {
@@ -120,6 +131,7 @@ class _TrainingPageState extends State<TrainingPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: FloorPlanWidget(
+                  imageFloor: imageFloor,
                   position: _tapX != null && _tapY != null
                       ? (x: _tapX!, y: _tapY!)
                       : null,
@@ -204,6 +216,24 @@ class _TrainingPageState extends State<TrainingPage> {
             );
           },
         ),
+        // FAB
+        Positioned(
+          bottom: 40.0,
+          right: 40.0,
+          child: FloatingActionButton(
+            child: Icon(Icons.image),
+            onPressed: () async {
+              var image = await ImageService.pickImage();
+              if (image != null) {
+                imageCache.clear();
+                imageCache.clearLiveImages();
+                setState(() {
+                  imageFloor = image;
+                });
+              }
+            },
+          ),
+        )
       ],
     );
   }

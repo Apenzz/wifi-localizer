@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 class FloorPlanWidget extends StatelessWidget {
   final ({double x, double y})? position;
   final List<({double x, double y})> trainingPoints;
   final void Function(double x, double y)? onTap;
   final Color dotColor;
+  final File? imageFloor;
 
   FloorPlanWidget({
     this.position,
     this.trainingPoints = const [],
     this.onTap,
     this.dotColor = Colors.lightBlueAccent,
+    this.imageFloor,
   });
 
   @override
@@ -21,12 +24,8 @@ class FloorPlanWidget extends StatelessWidget {
         border: Border.all(color: Colors.black, width: 1),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          )
-        ]
+          BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4)),
+        ],
       ),
       child: GestureDetector(
         onTapDown: onTap != null
@@ -37,19 +36,26 @@ class FloorPlanWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           child: Stack(
             children: [
-              Image.asset('assets/torre_archimede_piano1.jpg'),
-              ...trainingPoints.map((point) => Positioned(
-                left: point.x - 5,
-                top: point.y - 5,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    shape: BoxShape.circle,
+              imageFloor != null
+                  ? Image.file(
+                      imageFloor!,
+                      key: ValueKey(imageFloor!.lastModifiedSync().toString()),
+                    )
+                  : Center(child: Text('No image selected')),
+              ...trainingPoints.map(
+                (point) => Positioned(
+                  left: point.x - 5,
+                  top: point.y - 5,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
-              )),
+              ),
               if (position != null)
                 Positioned(
                   left: position!.x - 7.5,
