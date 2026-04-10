@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 class FloorPlanWidget extends StatelessWidget {
   final ({double x, double y})? position;
+  final List<({double x, double y})> trainingPoints;
   final void Function(double x, double y)? onTap;
   final Color dotColor;
 
   FloorPlanWidget({
     this.position,
+    this.trainingPoints = const [],
     this.onTap,
     this.dotColor = Colors.lightBlueAccent,
   });
@@ -36,6 +38,18 @@ class FloorPlanWidget extends StatelessWidget {
           child: Stack(
             children: [
               Image.asset('assets/planimetria_casa.jpg'),
+              ...trainingPoints.map((point) => Positioned(
+                left: point.x - 5,
+                top: point.y - 5,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              )),
               if (position != null)
                 Positioned(
                   left: position!.x - 7.5,

@@ -59,6 +59,7 @@ class _TrainingPageState extends State<TrainingPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: FloorPlanWidget(
                 position: _tapX != null && _tapY != null ? (x: _tapX!, y: _tapY!) : null,
+                trainingPoints: samples.map((s) => (x: s.x, y: s.y)).toList(),
                 onTap: (x, y) {
                   setState(() {
                     _tapX = x;
