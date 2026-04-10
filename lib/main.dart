@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:wifi_localizer/screens/home_page.dart';
 import 'package:wifi_localizer/screens/localize_page.dart';
 import 'package:wifi_localizer/screens/training_page.dart';
 
@@ -20,7 +19,6 @@ class _MyAppState extends State<MyApp> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    HomePage(),
     LocalizePage(),
     TrainingPage(),
   ];
@@ -38,7 +36,7 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text(_currentIndex == 0 ? 'WiFi Scanner' : _currentIndex == 1 ? 'Live Position' : 'Collect Fingerprints'),
+          title: Text(_currentIndex == 0 ? 'Live Position' : 'Collect Fingerprints'),
         ),
         body: _pages[_currentIndex],
         bottomNavigationBar: NavigationBar(
@@ -49,10 +47,6 @@ class _MyAppState extends State<MyApp> {
             });
           }, 
           destinations: const <Widget>[
-            NavigationDestination(
-              icon: Icon(Icons.wifi),
-              label: 'Scan',
-            ),
             NavigationDestination(
               icon: Icon(Icons.navigation),
               label: 'Localize',
