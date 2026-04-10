@@ -47,3 +47,5 @@ app.*.map.json
 # sensitive data
 assets/planimetria_casa.jpg
 assets/torre_archimede_piano1.jpg
+
+draft_report
