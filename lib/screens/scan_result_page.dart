@@ -10,9 +10,7 @@ class ScanResultPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Network Scan Details'),
-      ),
+      appBar: AppBar(title: Text('Network Scan Details')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
@@ -21,7 +19,10 @@ class ScanResultPage extends StatelessWidget {
             return ListTile(
               title: Text(networks[index].ssid),
               subtitle: Text(networks[index].bssid),
-              trailing: Text('${networks[index].rssi}'),
+              trailing: Text(
+                '${networks[index].rssi} dBm',
+                textScaler: TextScaler.linear(1.35),
+              ),
             );
           },
         ),
