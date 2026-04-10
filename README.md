@@ -40,3 +40,6 @@ A mobile app for WiFi-based indoor localization using RSSI fingerprinting and k-
 2. Select a positioning algorithm (kNN, weighted kNN, adaptive weighted kNN)
 3. Toggle **Live Position** on
 4. Your estimated position appears as a dot on the floor plan, updating every 5 seconds
+
+## Demo
+![App Demo](screenshots/demo.gif)
