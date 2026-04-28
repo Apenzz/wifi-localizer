@@ -67,41 +67,45 @@ def knn_adaptive(test_networks, training):
     nearest = distances[:k]
     return weighted_average(nearest)
 
-def evaluate(training, test_data, method, method_name):
+def evaluate(training, test_data, method, method_name, pixels_per_meter):
     errors = []
     for test in test_data:
         estimate = method(test['networks'], training)
         if estimate:
             error = math.sqrt((test['x'] - estimate[0]) ** 2 + (test['y'] - estimate[1]) ** 2)
             errors.append(error)
-    avg = sum(errors) / len(errors)
-    max_err = max(errors)
-    min_err = min(errors)
-    print(f"{method_name}: avg={avg:.1f}px, max={max_err:.1f}px, min={min_err:.1f}px")
-    return errors
+    errors_m = [e / pixels_per_meter for e in errors]
+    avg = sum(errors_m) / len(errors_m)
+    max_err = max(errors_m)
+    min_err = min(errors_m)
+    print(f"{method_name}: avg={avg:.1f}m, max={max_err:.1f}m, min={min_err:.1f}")
+    return errors, errors_m
 
 training = load_fingerprints('training_fingerprints.json')
 test_data = load_fingerprints('test_fingerprints.json')
 
-PIXELS_PER_METER = 30
+PIXELS_PER_METER = 14.3
+DISPLAY_WIDTH = 350.7
+FLOOR_PLAN_PATH = '../assets/planimetria_casa.jpg'
 
 # Evaluate
-results = {}
+results_px = {}
+results_m = {}
 for name, method in [('kNN', knn_basic), ('wkNN', knn_weighted), ('sawkNN', knn_adaptive)]:
-    errors_px = evaluate(training, test_data, method, name)
-    errors_m = [e / PIXELS_PER_METER for e in errors_px]
-    results[name] = errors_m
+    errors_px, errors_m = evaluate(training, test_data, method, name, PIXELS_PER_METER)
+    results_px[name] = errors_px
+    results_m[name] = errors_m
 
 # Bar chart
-methods = list(results.keys())
-avgs = [sum(e)/len(e) for e in results.values()]
-maxes = [max(e) for e in results.values()]
+methods = list(results_m.keys())
+avgs = [sum(e) / len(e) for e in results_m.values()]
+maxes = [max(e) for e in results_m.values()]
 
 fig, ax = plt.subplots()
 x = range(len(methods))
 width = 0.35
-ax.bar([i - width/2 for i in x], avgs, width, label='Avg Error (m)')
-ax.bar([i + width/2 for i in x], maxes, width, label='Max Error (m)')
+ax.bar([i - width / 2 for i in x], avgs, width, label='Avg Error (m)')
+ax.bar([i + width / 2 for i in x], maxes, width, label='Max Error (m)')
 ax.set_ylabel('Error (meters)')
 ax.set_xticks(x)
 ax.set_xticklabels(methods)
@@ -111,7 +115,9 @@ plt.savefig('accuracy_comparison.png', dpi=150)
 plt.show()
 
 # Scatter plot
-floor_plan = Image.open('../assets/planimetria_casa.jpg')
+floor_plan = Image.open(FLOOR_PLAN_PATH)
+img_width, img_height = floor_plan.size
+scale = img_width / DISPLAY_WIDTH
 
 fig, axes = plt.subplots(1, 3, figsize=(18, 6))
 for ax, (name, method) in zip(axes, [('kNN', knn_basic), ('wkNN', knn_weighted), ('sawkNN', knn_adaptive)]):
@@ -119,9 +125,9 @@ for ax, (name, method) in zip(axes, [('kNN', knn_basic), ('wkNN', knn_weighted),
     for test in test_data:
         estimate = method(test['networks'], training)
         if estimate:
-            ax.plot(test['x'], test['y'], 'go', markersize=8)  # real = green
-            ax.plot(estimate[0], estimate[1], 'rx', markersize=8)  # estimated = red
-            ax.plot([test['x'], estimate[0]], [test['y'], estimate[1]], 'r-', alpha=0.3)  # error line
+            ax.plot(test['x'] * scale, test['y'] * scale, 'go', markersize=8)
+            ax.plot(estimate[0] * scale, estimate[1] * scale, 'rx', markersize=8)
+            ax.plot([test['x'] * scale, estimate[0] * scale], [test['y'] * scale, estimate[1] * scale], 'r-', alpha=0.3)
     ax.set_title(name)
     ax.axis('off')
 
